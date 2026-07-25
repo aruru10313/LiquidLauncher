@@ -1,11 +1,11 @@
 <script>
     import {createEventDispatcher} from "svelte";
     import GeneralSettings from "./GeneralSettings.svelte";
-    import PremiumSettings from "./PremiumSettings.svelte";
+    import AboutSettings from "./AboutSettings.svelte";
     import SettingsContainer from "../../settings/SettingsContainer.svelte";
     import Tabs from "../../settings/tab/Tabs.svelte";
 
-    export let client;
+    export let client = null;
     export let options;
     let activeSettingsTab = "General";
 
@@ -17,7 +17,7 @@
         on:hideSettings={() => dispatch('hide')}
 >
     <Tabs
-            tabs={["General", "Premium"]}
+            tabs={["General", "About"]}
             bind:activeTab={activeSettingsTab}
             slot="tabs"
     />
@@ -26,10 +26,7 @@
         <GeneralSettings
                 bind:options
         />
-    {:else if activeSettingsTab === "Premium"}
-        <PremiumSettings
-                {client}
-                bind:options
-        />
+    {:else if activeSettingsTab === "About"}
+        <AboutSettings />
     {/if}
 </SettingsContainer>

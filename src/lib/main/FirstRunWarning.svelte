@@ -9,21 +9,15 @@
 </script>
 
 <SettingsContainer
-        title="Welcome to LiquidBounce!"
+        title="xmasLegacy Launcher에 오신 것을 환영합니다!"
         on:hideSettings={() => dispatch('hide')}
 >
     <Description
-            description="During the first launch or when a new update of LiquidBounce is available, a download window will show up. This is our way of generating advertising revenue for the client. If you do not want to see advertisements, you can purchase LiquidBounce Premium. You might also want to check out the quick start guide for tips on how to use LiquidBounce."
+            description="xmasLegacy Launcher를 이용해 주셔서 감사합니다. 원활한 게임 실행을 위해 아래 진행 버튼을 눌러주세요."
     />
 
     <ButtonSetting
-            text="Quick Start Guide"
-            on:click={() => openUrl("https://liquidbounce.net/docs/get-started")}
-            color="#B83529"
-    />
-
-    <ButtonSetting
-            text="Continue"
+            text="진행하기"
             on:click={() => dispatch('continue')}
             color="#4677FF"
     />

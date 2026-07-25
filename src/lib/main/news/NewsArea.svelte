@@ -1,31 +1,12 @@
 <script>
     import SocialBar from "../../common/social/SocialBar.svelte";
-    import News from "./News.svelte";
-    import {invoke} from "@tauri-apps/api/core";
-
-    export let client;
-
-    let news = [];
-
-    // TODO: Might support pagination in the future
-    invoke("fetch_blog_posts", {
-        client,
-        page: 1
-    }).then((onlineNews) => {
-        news = onlineNews.items;
-    }).catch((e) => console.error(e));
 </script>
 
 <div class="news-area">
-    <div class="news-wrapper">
-        {#each news as n}
-            <News {...n} />
-        {/each}
+    <div class="info-card">
+        <h3>xmasLegacy Launcher</h3>
+        <p>xmasLegacy 런처에 오신 것을 환영합니다! 안전하고 쾌적한 마인크래프트 플레이 환경을 제공합니다.</p>
     </div>
-
-    <button class="button-scroll">
-        <img class="icon" src="img/icon/icon-news-scroll.svg" alt="scroll" />
-    </button>
 
     <div class="social-bar-wrapper">
         <SocialBar />
@@ -33,29 +14,37 @@
 </div>
 
 <style>
+    .news-area {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        overflow: hidden;
+    }
+
+    .info-card {
+        background-color: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 24px;
+        color: #ffffff;
+    }
+
+    .info-card h3 {
+        margin-top: 0;
+        margin-bottom: 12px;
+        font-size: 20px;
+        color: #4677FF;
+    }
+
+    .info-card p {
+        margin: 0;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
     .social-bar-wrapper {
         display: flex;
         justify-content: flex-end;
     }
-
-    .news-area {
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-    }
-
-    .news-wrapper {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        grid-auto-rows: max-content;
-        overflow: auto;
-        flex: 1;
-        gap: 20px;
-    }
-
-    .button-scroll {
-        background-color: transparent;
-        border: none;
-        margin: 20px 0;
-    }
 </style>
+

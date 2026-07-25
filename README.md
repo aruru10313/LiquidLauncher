@@ -1,76 +1,30 @@
-# LiquidLauncher
-The official launcher for LiquidBounce.
+# xmasLegacy Launcher
 
-Website: https://liquidbounce.net \
-Forum: https://forums.ccbluex.net \
-Guilded: https://guilded.gg/CCBlueX \
-YouTube: https://youtube.com/CCBlueX \
-Twitter: https://twitter.com/CCBlueX
+A clean custom Minecraft launcher for xmasLegacy, built with Tauri, Rust, and Svelte.
 
-## Screenshots
-<table>
-    <tr>
-        <td>
-            <img src="gh_assets/screenshot-1.png">
-        </td>
-        <td>
-            <img src="gh_assets/screenshot-2.png">
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <img src="gh_assets/screenshot-3.png">
-        </td>
-        <td>
-            <img src="gh_assets/screenshot-4.png">
-        </td>
-    </tr>
-    <tr>
-        <td>
-            <img src="gh_assets/screenshot-5.png">
-        </td>
-    </tr>
-</table>
+> **Note:** This project is a customized fork based on [LiquidLauncher](https://github.com/CCBlueX/LiquidLauncher) by CCBlueX (Marco Beyer).
 
-## Issues
-If you notice any bugs or missing features, you can let us know by opening an issue [here](https://github.com/CCBlueX/LiquidLauncher/issues).
+## Features
+- Lightweight & fast Minecraft launcher interface
+- Powered by Tauri & Svelte
+- Modern, clean user experience without bloatware or ads
 
-## License
-This project is subject to the [GNU General Public License v3.0](LICENSE). This does only apply for source code located directly in this clean repository. During the development and compilation process, additional source code may be used to which we have obtained no rights. Such code is not covered by the GPL license.
+## License & Credits
+This project is subject to the [GNU General Public License v3.0](LICENSE).
 
-For those who are unfamiliar with the license, here is a summary of its main points. This is by no means legal advice nor legally binding.
+Original project created by **CCBlueX** (Marco Beyer / Izuna / superblaubeere27).  
+Website: https://liquidbounce.net
 
-You are allowed to
-- use
-- share
-- modify
+For those who are unfamiliar with the license, here is a summary of its main points:
+- You are allowed to use, share, and modify this project.
+- **You must disclose the source code of your modified work under the same GPL-3.0 license.**
 
-this project entirely or partially for free and even commercially. However, please consider the following:
+## Build Instructions
+Requirements: [Rust](https://www.rust-lang.org/), [Node.js](https://nodejs.org/), and [Bun](https://bun.sh/) or [npm](https://npmjs.com/).
 
-- **You must disclose the source code of your modified work and the source code you took from this project. This means you are not allowed to use code from this project (even partially) in a closed-source (or even obfuscated) application.**
-- **Your modified application must also be licensed under the GPL** 
+```bash
+bun install
+bun run build
+bun run tauri dev
+```
 
-Do the above and share your source code with everyone; just like we do.
-
-## Icons
-We use [Clarity Line Icons](https://www.svgrepo.com/collection/clarity-line-icons/) for this project.
-
-## Compile it yourself!
-LiquidLauncher is using Tauri and is written in the programming language Rust, so make sure that it is installed properly. Instructions can be found on [Rust's website](https://www.rust-lang.org/learn/get-started). It also requires NodeJS and bun.
-1. Clone the repository using `git clone --recurse-submodules https://github.com/CCBlueX/LiquidLauncher`. 
-2. Navigate into your local repository folder.
-3. Execute the command `bun install && bun run build`
-4. Now you can start the launcher using `bun run tauri dev` or build it by using `bun run tauri build`
-
-## Imprint
-
-**CCBlueX**  
-Vahrenwalder Str. 269A
-30179 Hanover
-Germany
-
-**Owner and responsible for the content:** Marco Beyer
-
-## Contributing
-
-We appreciate contributions. So if you want to support us, feel free to make changes to LiquidLauncher's source code and submit a pull request.

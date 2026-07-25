@@ -14,7 +14,7 @@
         on:hideSettings={() => dispatch('hide')}
 >
     <Description
-            description="The selected version of LiquidBounce is no longer officially supported. We recommend upgrading to the latest version of LiquidBounce Nextgen, which works with all Minecraft versions from 1.7 onward."
+            description="선택한 마인크래프트 버전은 구버전입니다. 게임 실행 시 권장 버전으로 업그레이드하거나 계속 진행할 수 있습니다."
     />
     <ButtonSetting
             text="Switch to Nextgen now"

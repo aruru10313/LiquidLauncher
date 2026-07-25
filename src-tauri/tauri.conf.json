@@ -1,7 +1,7 @@
 {
-  "productName": "LiquidLauncher",
+  "productName": "xmasLegacy Launcher",
   "version": "0.5.0",
-  "identifier": "net.ccbluex.liquidlauncher",
+  "identifier": "com.xmaslegacy.launcher",
   "build": {
     "beforeBuildCommand": "bun run build",
     "beforeDevCommand": "bun run dev",
@@ -12,7 +12,7 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "LiquidLauncher",
+        "title": "xmasLegacy Launcher",
         "label": "main",
         "width": 1000,
         "minWidth": 1000,
@@ -35,8 +35,8 @@
   "bundle": {
     "active": true,
     "category": "Game",
-    "copyright": "CCBlueX",
-    "publisher": "CCBlueX",
+    "copyright": "xmasLegacy (Based on LiquidLauncher by CCBlueX)",
+    "publisher": "xmasLegacy",
     "externalBin": [],
     "icon": [
       "icons/32x32.png",
@@ -45,8 +45,8 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "shortDescription": "A LiquidBounce launcher for Minecraft",
-    "longDescription": "A LiquidBounce hacked-client launcher for the game Minecraft",
+    "shortDescription": "Custom Minecraft launcher for xmasLegacy",
+    "longDescription": "A custom Minecraft launcher for xmasLegacy built with Tauri & Svelte",
     "license": "GPL-3.0",
     "licenseFile": "../LICENSE",
     "resources": [],
@@ -77,8 +77,7 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEU1QkM5MTlDREQ4NkEzNjMKUldSam80YmRuSkc4NVNxS2MzYVZPN1I4a283RkdsS0lPTjVjRWlxQ1JhdzFZUkRtc0c1eEtqSzQK",
       "endpoints": [
-        "https://github.com/CCBlueX/LiquidLauncher/releases/latest/download/latest.json",
-        "https://api.liquidbounce.net/api/v1/launcher/releases/{{target}}/{{current_version}}"
+        "https://github.com/aruru10313/LiquidLauncher/releases/latest/download/latest.json"
       ]
     }
   }

@@ -2,7 +2,14 @@ name: Build
 on:
   push:
     branches:
+      - main
+      - master
       - tauri/v2
+  pull_request:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
 
 jobs:
   build-tauri:
@@ -35,10 +42,10 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 21
+          node-version: 20
 
       - name: setup bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
@@ -78,11 +85,7 @@ jobs:
           releaseName: >-
             ${{ startsWith(github.event.head_commit.message, 'release: ') && 'Release v__VERSION__' || format('Development build - {0}', github.sha) }}
           releaseBody: >-
-            ${{ startsWith(github.event.head_commit.message, 'release: ') && 'See the assets to download and install this version.' || format('Development build from commit {0}
-
-            This is an automated build from the latest commit. It may be unstable.
-
-            Commit message: {1}', github.sha, github.event.head_commit.message) }}
+            ${{ startsWith(github.event.head_commit.message, 'release: ') && 'See the assets to download and install this version.' || format('Development build from commit {0}', github.sha) }}
           releaseDraft: >-
             ${{ startsWith(github.event.head_commit.message, 'release: ') }}
           prerelease: >-

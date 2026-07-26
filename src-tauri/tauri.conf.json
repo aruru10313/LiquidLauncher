@@ -51,7 +51,7 @@
     "licenseFile": "../LICENSE",
     "resources": [],
     "targets": "all",
-    "createUpdaterArtifacts": "v1Compatible",
+    "createUpdaterArtifacts": false,
     "windows": {
       "certificateThumbprint": null,
       "digestAlgorithm": "sha256",

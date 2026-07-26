@@ -8,24 +8,7 @@
 
     export let options;
 
-    let offlineUsername;
     let microsoftCode = null;
-
-    async function handleOfflineLoginClick(e) {
-        if (offlineUsername.length > 16 || offlineUsername.length < 1) {
-            alert("Username must be between 1 and 16 characters long.");
-            return;
-        }
-
-        const usernameRegex = /^[a-zA-Z0-9_]+$/;
-        if (!usernameRegex.test(offlineUsername)) {
-            alert("Username can only contain letters, numbers, and underscores.");
-            return;
-        }
-
-        options.start.account = await invoke("login_offline", {username: offlineUsername});
-        options.store();
-    }
 
     async function handleMicrosoftLoginClick(e) {
         try {
@@ -34,9 +17,7 @@
         } catch (err) {
             alert(
                 "Microsoft authentication failed.\n\n" +
-                 err + "\n\n" +
-                "Should you be unable to resolve this issue, please use the 'Offline' login option " +
-                "and attempt to log in through the client's inbuilt account manager."
+                 err
             );
             cancelMicrosoft();
         }
@@ -55,8 +36,7 @@
     {#if !microsoftCode}
         <div class="title">Log in</div>
 
-        <ModalInput placeholder="Username" icon="person" characterLimit={16} bind:value={offlineUsername} />
-        <ModalButton text="Offline login" primary={false} on:click={handleOfflineLoginClick} />
+
         <ModalButton text="Microsoft login" primary={true} on:click={handleMicrosoftLoginClick} />
     {:else}
         <div class="title">Microsoft Login</div>

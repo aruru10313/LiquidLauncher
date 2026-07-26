@@ -1,4 +1,4 @@
-<img class="logo" src="img/logo.svg" alt="logo">
+<img class="logo" src="img/logo.png" alt="logo">
 
 <style>
     .logo {

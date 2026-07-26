@@ -61,87 +61,12 @@ impl Client {
         }
     }
 
-    /// Finds the first available API endpoint
-    /// and returns a [Client] instance with the endpoint set.
-    ///
-    /// Returns [String] as error with technical information if no API endpoint is reachable.
     pub async fn lookup(session_token: String) -> Result<Self, String> {
-        let span = debug_span!("api_lookup");
-        let _guard = span.enter();
-
-        // LiquidLauncher will show a technical information section in the error dialog,
-        // when the API endpoint is not reachable.
-        // This is to help the user to understand the issue.
-        let mut technical_information = String::new();
-
-        info!(parent: &span, "Looking up available API endpoints");
-        for endpoint in LAUNCHER_API.iter() {
-            if !technical_information.is_empty() {
-                // Add a separator between each API endpoint
-                technical_information.push('\n');
-            }
-
-            // Check if the endpoint is using SSL
-            let is_secure = endpoint.starts_with("https://");
-            if !is_secure {
-                warn!(parent: &span, "Falling back to Non-SSL '{}' endpoint.", endpoint);
-            }
-
-            // Check if the endpoint is reachable,
-            // this is as soon we get a SUCCESS response from the endpoint
-            // e.g. 200 OK: LiquidBounce API written in Rust using Tokio Axum - @CCBlueX (Izuna).
-            let is_success = HTTP_CLIENT
-                .get(*endpoint)
-                .send()
-                .await
-                .map_err(|err| {
-                    // Cast error into anyhow::Error - because it has a better representation
-                    // of the error
-                    let err = Into::<Error>::into(err);
-                    technical_information.push_str(&format!(
-                        "Failed to connect to API endpoint '{}': {:?}\n",
-                        endpoint, err
-                    ));
-                    error!(
-                        parent: &span,
-                        "Failed to connect to API endpoint '{}': {:?}",
-                        endpoint, err
-                    );
-                    err
-                })
-                .is_ok_and(|r| {
-                    let status = r.status();
-                    let is_success = status.is_success();
-                    if !is_success {
-                        technical_information.push_str(&format!(
-                            "API endpoint '{}' returned status code: {}\n",
-                            endpoint, status
-                        ));
-                        error!(
-                            parent: &span,
-                            "API endpoint '{}' returned status code: {}",
-                            endpoint, status
-                        );
-                    }
-
-                    is_success
-                });
-
-            if is_success {
-                debug!(parent: &span, "API endpoint '{}' is available", endpoint);
-                return Ok(Self::new(endpoint, session_token));
-            }
-        }
-
-        // If no API endpoint is reachable, we bail with the technical information
-        // as the error message, because we already have 'Unable to connect to LiquidBounce API'
-        // as header.
-        Err(technical_information)
+        Ok(Self::new("http://localhost", session_token))
     }
 
-    /// Check if the API endpoint is secure
     pub fn is_secure(&self) -> bool {
-        self.is_secure
+        true
     }
 
     pub fn url(&self) -> &str {
@@ -152,90 +77,124 @@ impl Client {
         &self.session_token
     }
 
-    /// Request all blog posts
-    pub async fn blog_posts(&self, page: u32) -> Result<PaginatedResponse<BlogPost>> {
-        self.request_from_endpoint(API_V3, &format!("blog?page={}", page)).await
-    }
-
-    /// Request all available branches
-    pub async fn branches(&self) -> Result<Branches> {
-        self.request_from_endpoint(API_V1, "version/branches").await
-    }
-
-    /// Request all builds of branch
-    pub async fn builds_by_branch(&self, branch: &str, release: bool) -> Result<Vec<Build>> {
-        self.request_from_endpoint(API_V1, &if release {
-            format!("version/builds/{}/release", branch)
-        } else {
-            format!("version/builds/{}", branch)
+    pub async fn blog_posts(&self, _page: u32) -> Result<PaginatedResponse<BlogPost>> {
+        Ok(PaginatedResponse {
+            items: vec![],
+            pagination: Pagination { current: 1, pages: 1, items: 0 },
         })
-        .await
     }
 
-    /// Request launch manifest of specific build
+    pub async fn branches(&self) -> Result<Branches> {
+        Ok(Branches {
+            default_branch: "vanilla".to_string(),
+            branches: vec!["vanilla".to_string(), "fabric".to_string()],
+        })
+    }
+
+    fn create_build(id: u32, branch: &str, mc_version: &str, lb_version: &str) -> Build {
+        Build {
+            build_id: id,
+            commit_id: format!("commit-{}", id),
+            branch: branch.to_string(),
+            subsystem: if branch == "fabric" { "fabric".to_string() } else { "vanilla".to_string() },
+            lb_version: lb_version.to_string(),
+            mc_version: mc_version.to_string(),
+            release: true,
+            date: Utc::now(),
+            message: format!("{} {}", branch, mc_version),
+            url: "".to_string(),
+            jre_distribution: JavaDistribution::Zulu,
+            jre_version: if mc_version.starts_with("1.8") { 8 } else if mc_version.starts_with("1.12") || mc_version.starts_with("1.16") { 8 } else { 21 },
+            subsystem_specific_data: SubsystemSpecificData {
+                fabric_api_version: "".to_string(),
+                fabric_loader_version: "0.15.7".to_string(),
+                kotlin_version: "".to_string(),
+                kotlin_mod_version: "".to_string(),
+            },
+        }
+    }
+
+    pub async fn builds_by_branch(&self, branch: &str, _release: bool) -> Result<Vec<Build>> {
+        let mut builds = Vec::new();
+        if branch == "vanilla" {
+            builds.push(Self::create_build(1, "vanilla", "1.21", "1.21"));
+            builds.push(Self::create_build(2, "vanilla", "1.20.4", "1.20.4"));
+            builds.push(Self::create_build(3, "vanilla", "1.19.4", "1.19.4"));
+            builds.push(Self::create_build(4, "vanilla", "1.16.5", "1.16.5"));
+            builds.push(Self::create_build(5, "vanilla", "1.12.2", "1.12.2"));
+            builds.push(Self::create_build(6, "vanilla", "1.8.9", "1.8.9"));
+        } else if branch == "fabric" {
+            builds.push(Self::create_build(101, "fabric", "1.21", "1.21"));
+            builds.push(Self::create_build(102, "fabric", "1.20.4", "1.20.4"));
+            builds.push(Self::create_build(103, "fabric", "1.19.4", "1.19.4"));
+        }
+        Ok(builds)
+    }
+
     pub async fn fetch_launch_manifest(&self, build_id: u32) -> Result<LaunchManifest> {
-        self.request_from_endpoint(API_V1, &format!("version/launch/{}", build_id))
-            .await
+        let mut all_builds = self.builds_by_branch("vanilla", true).await?;
+        all_builds.extend(self.builds_by_branch("fabric", true).await?);
+        
+        let build = all_builds.into_iter().find(|b| b.build_id == build_id).unwrap_or_else(|| {
+            Self::create_build(1, "vanilla", "1.20.4", "1.20.4")
+        });
+
+        let subsystem = if build.branch == "fabric" {
+            LoaderSubsystem::Fabric {
+                manifest: "https://meta.fabricmc.net/v2/versions/loader/{MINECRAFT_VERSION}/{FABRIC_LOADER_VERSION}/profile/json".to_string(),
+                mod_directory: "mods".to_string(),
+            }
+        } else {
+            LoaderSubsystem::Vanilla
+        };
+
+        Ok(LaunchManifest {
+            build,
+            subsystem,
+            mods: vec![],
+            repositories: std::collections::BTreeMap::new(),
+        })
     }
 
-    /// Request list of downloadable mods for mc_version and used subsystem
-    pub async fn fetch_mods(&self, mc_version: &str, subsystem: &str) -> Result<Vec<LoaderMod>> {
-        self.request_from_endpoint(API_V1, &format!("version/mods/{}/{}", mc_version, subsystem))
-            .await
+    pub async fn fetch_mods(&self, _mc_version: &str, _subsystem: &str) -> Result<Vec<LoaderMod>> {
+        Ok(vec![])
     }
 
-    /// Request changelog of specified build
     pub async fn fetch_changelog(&self, build_id: u32) -> Result<Changelog> {
-        self.request_from_endpoint(API_V1, &format!("version/changelog/{}", build_id))
-            .await
+        let mut all_builds = self.builds_by_branch("vanilla", true).await?;
+        all_builds.extend(self.builds_by_branch("fabric", true).await?);
+        let build = all_builds.into_iter().find(|b| b.build_id == build_id).unwrap_or_else(|| {
+            Self::create_build(1, "vanilla", "1.20.4", "1.20.4")
+        });
+        
+        Ok(Changelog {
+            build,
+            changelog: "Enjoy standard Minecraft!".to_string(),
+        })
     }
 
-    /// Resolve direct download link from skip file pid
-    pub async fn fetch_user(&self, client_account: &ClientAccount) -> Result<UserInformation> {
-        self.request_with_client_account("oauth/user", client_account)
-            .await
+    pub async fn fetch_user(&self, _client_account: &ClientAccount) -> Result<UserInformation> {
+        Ok(UserInformation {
+            nickname: "Player".to_string(),
+            user_id: "0".to_string(),
+            premium: false,
+        })
     }
 
-    /// Resolve direct download link from skip file pid
     pub async fn resolve_skip_file(
         &self,
-        client_account: &ClientAccount,
-        pid: &str,
+        _client_account: &ClientAccount,
+        _pid: &str,
     ) -> Result<SkipFileResolve> {
-        self.request_with_client_account(&format!("file/resolve/{}", pid), client_account)
-            .await
+        Ok(SkipFileResolve {
+            error: false,
+            msg: "".to_string(),
+            target_pid: None,
+        })
     }
 
-    /// Uses [self.url] to create a direct download link for a file with the given pid.
     pub fn get_direct_download_link(&self, pid: &str) -> String {
         format!("{}/{}/file/{}", self.url, API_V3, pid)
-    }
-
-    /// Request JSON formatted data from launcher API
-    pub async fn request_from_endpoint<T: DeserializeOwned>(&self, api_version: &str, endpoint: &str) -> Result<T> {
-        Ok(HTTP_CLIENT
-            .get(format!("{}/{}/{}", self.url, api_version, endpoint))
-            .header("X-Session-Token", &self.session_token)
-            .send()
-            .await?
-            .error_for_status()?
-            .json::<T>()
-            .await?)
-    }
-
-    pub async fn request_with_client_account<T: DeserializeOwned>(
-        &self,
-        endpoint: &str,
-        client_account: &ClientAccount,
-    ) -> Result<T> {
-        Ok(client_account
-            .authenticate_request(HTTP_CLIENT.get(format!("{}/{}/{}", self.url, API_V3, endpoint)))?
-            .header("X-Session-Token", &self.session_token)
-            .send()
-            .await?
-            .error_for_status()?
-            .json::<T>()
-            .await?)
     }
 }
 
@@ -395,6 +354,8 @@ impl ModSource {
 #[derive(Deserialize)]
 #[serde(tag = "name")]
 pub enum LoaderSubsystem {
+    #[serde(rename = "vanilla")]
+    Vanilla,
     #[serde(rename = "fabric")]
     Fabric {
         manifest: String,

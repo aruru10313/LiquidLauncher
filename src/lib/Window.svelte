@@ -26,7 +26,7 @@
             if (result?.available) {
                 const shouldUpdate = await ask(
                     "A Launcher update is available. Would you like to install it now?",
-                    "LiquidLauncher"
+                    "xmasLegacy Launcher"
                 );
 
                 if (shouldUpdate) {
@@ -73,7 +73,7 @@
         } catch (e) {
             console.error("Failed to set up API client:", e);
             error = {
-                message: "Failed to establish connection with LiquidBounce API",
+                message: "Failed to establish connection with local API",
                 error: e
             };
         }

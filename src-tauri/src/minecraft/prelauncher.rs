@@ -27,7 +27,6 @@ use tracing::*;
 
 use crate::app::client_api::{Client, LaunchManifest, LoaderMod, LoaderSubsystem, ModSource};
 use crate::app::gui::ShareableWindow;
-use crate::app::webview::open_download_page;
 use crate::auth::ClientAccount;
 use crate::error::LauncherError;
 use crate::minecraft::launcher;
@@ -268,84 +267,8 @@ pub async fn retrieve_and_copy_mods(
             fs::create_dir_all(&current_mod_path.parent().unwrap()).await?;
 
             let contents = match &current_mod.source {
-                ModSource::SkipAd {
-                    artifact_name: _,
-                    url,
-                    extract,
-                } => {
-                    launcher_data.log(&format!(
-                        "Opening download page for mod {} on {}",
-                        current_mod.name, url
-                    ));
-                    launcher_data.progress_update(ProgressUpdate::set_label(format!(
-                        "Opening download page for mod {}",
-                        current_mod.name
-                    )));
-
-                    let pid = match client_account {
-                        Some(account) => {
-                            // PID is taken from the URL which is the last part of the URL
-                            // https://dl.liquidbounce.net/skip/c7kMT2q00U -> c7kMT2q00U
-                            let pid = url.split('/').last().context("Failed to get PID")?;
-                            let skip_file_resolve =
-                                client.resolve_skip_file(account, pid).await?;
-                            
-                            // If the skip file resolve has a target PID, use it - 
-                            // if not, it means that the account is not allowed for direct downloads
-                            skip_file_resolve.target_pid.ok_or_else(|| {
-                                anyhow!("Failed to get direct URL for mod {}", current_mod.name)
-                            })?
-                        }
-                        None => open_download_page(url, launcher_data).await?,
-                    };
-                    
-                    // Download the mod
-                    let url = client.get_direct_download_link(&pid);
-                    launcher_data.log(&format!(
-                        "Downloading mod {} from {}",
-                        current_mod.name, url
-                    ));
-                    launcher_data.progress_update(ProgressUpdate::set_label(format!(
-                        "Downloading mod {}",
-                        current_mod.name
-                    )));
-                    
-                    let retrieved_bytes = download_file(&url, |a, b| {
-                        launcher_data.progress_update(ProgressUpdate::set_for_step(
-                            ProgressUpdateSteps::DownloadLiquidBounceMods,
-                            get_progress(mod_idx, a, b),
-                            max,
-                        ))
-                    })
-                    .await?;
-
-                    // Extract bytes
-                    if *extract {
-                        let reader = ZipFileReader::new(retrieved_bytes).await?;
-
-                        // Find .JAR file in archive and get index of it
-                        let index_of_file_to_extract = reader
-                            .file()
-                            .entries()
-                            .iter()
-                            .position(|x| x.entry().filename().ends_with(".jar"))
-                            .ok_or_else(|| {
-                                LauncherError::InvalidVersionProfile(
-                                    "There is no JAR in the downloaded archive".to_string(),
-                                )
-                            })?;
-                        let entry = reader.file().entries()[index_of_file_to_extract].entry();
-
-                        // Read file to extract
-                        let mut entry_reader = reader.entry(index_of_file_to_extract).await?;
-
-                        let mut output = Vec::with_capacity(entry.uncompressed_size() as usize);
-                        entry_reader.read_to_end(&mut output).await?;
-
-                        output
-                    } else {
-                        retrieved_bytes
-                    }
+                ModSource::SkipAd { .. } => {
+                    bail!("SkipAd downloads are not supported in this generic launcher");
                 }
                 ModSource::Repository {
                     repository,

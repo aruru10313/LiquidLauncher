@@ -2,7 +2,7 @@
     export let version;
 </script>
 
-<div class="launcher-version">LiquidLauncher {version}</div>
+<div class="launcher-version">xmasLegacy Launcher {version}</div>
 
 <style>
     .launcher-version {

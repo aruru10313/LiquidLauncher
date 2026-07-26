@@ -27,7 +27,7 @@
     <div class="warning-container">
         <h1>Security Warning</h1>
         <p class="warning-message">
-            LiquidLauncher is unable to connect to the secure (HTTPS) API endpoint, 
+            xmasLegacy Launcher is unable to connect to the secure (HTTPS) API endpoint, 
             but was able to establish a connection to a non-secure (HTTP) endpoint.
         </p>
         

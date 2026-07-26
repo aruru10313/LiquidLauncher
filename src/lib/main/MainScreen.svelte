@@ -79,7 +79,7 @@
         } catch (e) {
             console.error("Failed to request builds:", e);
             error = {
-                message: "Failed to establish connection with LiquidBounce API",
+                message: "Failed to establish connection with local API",
                 error: e
             };
             return;
@@ -293,7 +293,7 @@
         } catch (e) {
             console.error("Failed to request branches:", e);
             error = {
-                message: "Failed to establish connection with LiquidBounce API",
+                message: "Failed to establish connection with local API",
                 error: e
             };
             return;

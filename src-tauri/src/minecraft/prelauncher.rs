@@ -101,58 +101,87 @@ pub(crate) async fn launch(
     .await?;
 
     launcher_data.progress_update(ProgressUpdate::set_label("Loading version profile..."));
-    let manifest_url = match subsystem {
-        LoaderSubsystem::Fabric { manifest, .. } => manifest
-            .replace("{MINECRAFT_VERSION}", &build.mc_version)
-            .replace(
-                "{FABRIC_LOADER_VERSION}",
-                &build.subsystem_specific_data.fabric_loader_version,
-            ),
-        LoaderSubsystem::Forge { manifest, .. } => manifest.clone(),
-    };
-    let mut version = (|| async { VersionProfile::load(&manifest_url).await })
-        .retry(ExponentialBuilder::default())
-        .notify(|err, dur| {
-            launcher_data.log(&format!(
-                "Failed to load version profile: {}. Retrying in {:?}. Error: {}",
-                manifest_url, dur, err
-            ));
-        })
-        .await?;
+    let mut version = match subsystem {
+        LoaderSubsystem::Vanilla => {
+            let url = mc_version_manifest
+                .versions
+                .iter()
+                .find(|x| x.id == build.mc_version)
+                .map(|x| &x.url)
+                .ok_or_else(|| {
+                    LauncherError::InvalidVersionProfile(format!(
+                        "unable to find version manifest for {}",
+                        build.mc_version
+                    ))
+                })?;
+            (|| async { VersionProfile::load(url).await })
+                .retry(ExponentialBuilder::default())
+                .notify(|err, dur| {
+                    launcher_data.log(&format!(
+                        "Failed to load vanilla version profile: {}. Retrying in {:?}. Error: {}",
+                        build.mc_version, dur, err
+                    ));
+                })
+                .await?
+        }
+        _ => {
+            let manifest_url = match subsystem {
+                LoaderSubsystem::Fabric { manifest, .. } => manifest
+                    .replace("{MINECRAFT_VERSION}", &build.mc_version)
+                    .replace(
+                        "{FABRIC_LOADER_VERSION}",
+                        &build.subsystem_specific_data.fabric_loader_version,
+                    ),
+                LoaderSubsystem::Forge { manifest, .. } => manifest.clone(),
+                LoaderSubsystem::Vanilla => unreachable!(),
+            };
 
-    if let Some(inherited_version) = &version.inherits_from {
-        let url = mc_version_manifest
-            .versions
-            .iter()
-            .find(|x| &x.id == inherited_version)
-            .map(|x| &x.url)
-            .ok_or_else(|| {
-                LauncherError::InvalidVersionProfile(format!(
-                    "unable to find inherited version manifest {}",
-                    inherited_version
-                ))
-            })?;
+            let mut version = (|| async { VersionProfile::load(&manifest_url).await })
+                .retry(ExponentialBuilder::default())
+                .notify(|err, dur| {
+                    launcher_data.log(&format!(
+                        "Failed to load version profile: {}. Retrying in {:?}. Error: {}",
+                        manifest_url, dur, err
+                    ));
+                })
+                .await?;
 
-        debug!(
-            "Determined {}'s download url to be {}",
-            inherited_version, url
-        );
-        launcher_data.log(&format!(
-            "Downloading inherited version {}...",
-            inherited_version
-        ));
+            if let Some(inherited_version) = &version.inherits_from {
+                let url = mc_version_manifest
+                    .versions
+                    .iter()
+                    .find(|x| &x.id == inherited_version)
+                    .map(|x| &x.url)
+                    .ok_or_else(|| {
+                        LauncherError::InvalidVersionProfile(format!(
+                            "unable to find inherited version manifest {}",
+                            inherited_version
+                        ))
+                    })?;
 
-        let parent_version = (|| async { VersionProfile::load(url).await })
-            .retry(ExponentialBuilder::default())
-            .notify(|err, dur| {
+                debug!(
+                    "Determined {}'s download url to be {}",
+                    inherited_version, url
+                );
                 launcher_data.log(&format!(
-                    "Failed to load inherited version profile: {}. Retrying in {:?}. Error: {}",
-                    inherited_version, dur, err
+                    "Downloading inherited version {}...",
+                    inherited_version
                 ));
-            })
-            .await?;
-        version.merge(parent_version)?;
-    }
+
+                let parent_version = (|| async { VersionProfile::load(url).await })
+                    .retry(ExponentialBuilder::default())
+                    .notify(|err, dur| {
+                        launcher_data.log(&format!(
+                            "Failed to load inherited version profile: {}. Retrying in {:?}. Error: {}",
+                            inherited_version, dur, err
+                        ));
+                    })
+                    .await?;
+                version.merge(parent_version)?;
+            }
+            version
+        }
+    };
 
     launcher_data.progress_update(ProgressUpdate::set_label(format!(
         "Launching {}...",

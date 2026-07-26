@@ -169,8 +169,8 @@ pub async fn launch<D: Send + Sync>(
     command_arguments.push(format!("-Dnet.ccbluex.liquidbounce.api.token={}", launching_parameter.client.session_token()));
     
     if let Some(client_account) = &launching_parameter.client_account {
-        command_arguments.push(format!("-Dnet.ccbluex.liquidbounce.account.access_token={}", client_account.get_access_token().secret()));
-        command_arguments.push(format!("-Dnet.ccbluex.liquidbounce.account.refresh_token={}", client_account.get_refresh_token().secret()));
+        command_arguments.push(format!("-Dnet.ccbluex.liquidbounce.account.access_token={}", client_account.get_access_token()));
+        command_arguments.push(format!("-Dnet.ccbluex.liquidbounce.account.refresh_token={}", client_account.get_refresh_token()));
         command_arguments.push(format!("-Dnet.ccbluex.liquidbounce.account.expires_at={}", client_account.get_expires_at()));
     }
     

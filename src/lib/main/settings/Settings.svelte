@@ -5,7 +5,7 @@
     import SettingsContainer from "../../settings/SettingsContainer.svelte";
     import Tabs from "../../settings/tab/Tabs.svelte";
 
-    export let client = null;
+
     export let options;
     let activeSettingsTab = "General";
 

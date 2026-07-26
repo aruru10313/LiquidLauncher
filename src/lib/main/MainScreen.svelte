@@ -335,7 +335,6 @@
 
 {#if settingsShown}
     <Settings
-            {client}
             bind:options
             on:hide={async () => {
                 settingsShown = false;

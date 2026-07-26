@@ -42,16 +42,17 @@ jobs:
       - name: setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
       - name: setup bun
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
 
-      - name: install Rust nightly
-        uses: dtolnay/rust-toolchain@nightly
+      - name: install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
         with:
+          toolchain: nightly-2026-01-14
           targets: >-
             ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
